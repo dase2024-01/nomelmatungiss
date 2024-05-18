@@ -22,6 +22,7 @@ image = Image.open('example.webp').convert('RGB')
 question = 'What is in the image?'
 msgs = [{'role': 'user', 'content': question}]
 
+
 res, context, _ = model.chat(
     image=image,
     msgs=msgs,
