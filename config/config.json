@@ -1,0 +1,27 @@
+{"app_name": "Word",
+                    "language_code": "lv",
+                     "context": "BLUE",
+                     "MIN_WORDS": 4,
+                     "MAX_SYMBOLS": 25,
+                     "MIN_SYMBOLS": 13,
+                    "capitalizeOutput": false,
+                   "capitalizeSyllables": false,
+                   "replaceVowelsWithNumbers": true,
+                   "vowelReplacementDictionary" : {
+                            "a": "4",
+                            "g": "9",
+                            "e": "5",
+                             "ī": "1",
+                               "o": "0",
+                               "u" : "#",
+                            "ž": "3",
+                            "š": "$",
+                       "y": "*",
+                       "q": "9",
+                       "i": "!",
+                       "ē": "&",
+                       "ā": "@"
+                   },
+                   "replaceGeminatedLetters": true,
+                   "itemToReplaceGeminatedLetters": "_"
+}
