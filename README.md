@@ -10,9 +10,10 @@ during the year 2023-24.
 - 8GB of RAM (for decent performance, 16 GB or more is recommended)
 - At least 8 GB of free disk space
 
-## Configuration:
 
-This configuration file is for a password generator application named "Word". Below are the details of the configuration parameters and their functions:
+## Behaviour Configuration:
+
+This configuration file, .json, is for a password generator application named "Word". Below are the details of the configuration parameters and their functions:
 
 app_name: "Word"
 
@@ -66,8 +67,12 @@ The character to replace geminated letters with. In this configuration, geminate
 
 ## Installation:
 
-1. `$ git clone https://github.com/dase2024-01/nomelmatungiss'
+Default server port is 8000 
 
+1. `$ git clone https://github.com/dase2024-01/nomelmatungiss`
+2. `$ launch.sh`
+
+## More granular installation:
 2. `venv/bin/activate`
 
 3. `pip install -r requirements.txt`
