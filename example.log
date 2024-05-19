@@ -1016,3 +1016,108 @@ requests.exceptions.ConnectionError: HTTPConnectionPool(host='localhost', port=8
     at least 3 words, at least 13 symbols, no more than 25 symbols 
     Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
     
+2024-05-19 10:34:39,733 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 10:34:43,960 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 10:34:48,909 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 10:34:48,910 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 10:35:05,958 - root - INFO - Prompt: 
+    Create one memorable passphrase in Persian for the following application Spotify
+    and context: white. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 10:35:49,025 - root - INFO - Prompt: 
+    Create one memorable passphrase in German for the following application Google Chrome
+    and context: white. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 11:04:59,714 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:05:00,007 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:05:04,090 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:05:32,547 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:05:32,757 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:05:35,648 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:05:45,310 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:05:45,311 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 11:06:00,531 - root - INFO - Prompt: 
+    Create one memorable passphrase in Persian for the following application System Settings
+    and context: linen. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 11:07:42,011 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:07:42,232 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:07:45,260 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:07:46,409 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:07:46,410 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 11:07:50,986 - root - INFO - Prompt: 
+    Create one memorable passphrase in Persian for the following application Terminal
+    and context: linen. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 11:07:56,717 - pynput.keyboard.Listener - ERROR - Unhandled exception in listener callback
+Traceback (most recent call last):
+  File "/Users/garamantys/PycharmProjects/pythonProject/.venv/lib/python3.9/site-packages/pynput/_util/__init__.py", line 229, in inner
+    return f(self, *args, **kwargs)
+  File "/Users/garamantys/PycharmProjects/pythonProject/.venv/lib/python3.9/site-packages/pynput/_util/darwin.py", line 283, in _handler
+    self._handle(proxy, event_type, event, refcon)
+  File "/Users/garamantys/PycharmProjects/pythonProject/.venv/lib/python3.9/site-packages/pynput/keyboard/_darwin.py", line 289, in _handle
+    self.on_press(key)
+  File "/Users/garamantys/PycharmProjects/pythonProject/.venv/lib/python3.9/site-packages/pynput/_util/__init__.py", line 145, in inner
+    if f(*args) is False:
+  File "/Users/garamantys/PycharmProjects/pythonProject/./send_request.py", line 92, in on_press
+    password = password.encode('latin-1').decode('utf-8')
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 0-9: ordinal not in range(256)
+2024-05-19 11:09:31,845 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:09:32,079 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:09:35,066 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:09:37,382 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:09:37,382 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 11:09:42,677 - root - INFO - Prompt: 
+    Create one memorable passphrase in Persian for the following application System Settings
+    and context: whitesmoke. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 11:17:37,521 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:17:38,064 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:17:43,534 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:20:05,004 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:20:05,898 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:20:11,736 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:22:37,187 - pynput.keyboard.Listener - WARNING - This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+2024-05-19 11:22:37,812 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:22:49,875 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:29:11,164 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:29:16,282 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:29:45,185 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:29:45,185 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 11:32:29,528 - root - INFO - key retrieved b'LuX-MuNf7nZ27nHvbLasajPdWkzo7xSbuduymw2emO8='
+2024-05-19 11:32:35,164 - root - INFO - Starting the server: http://localhost:8000/generate-password
+2024-05-19 11:32:44,900 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:32:44,901 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 11:33:09,096 - root - INFO - Prompt: 
+    Create one memorable passphrase in Persian for the following application Adobe Acrobat Reader
+    and context: linen. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 11:34:30,781 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:34:30,782 - root - INFO -  language of the locale en, language code fa 
+2024-05-19 11:34:35,568 - root - INFO - Prompt: 
+    Create one memorable passphrase in Persian for the following application Adobe Acrobat Reader
+    and context: linen. 
+    Should be a meaningful sentence: Subject - verb - object
+    at least 3 words, at least 13 symbols, no more than 25 symbols 
+    Write as {"passphrase" : "your passphrase"}. Return only passphrase. 
+    
+2024-05-19 11:35:41,417 - root - INFO - ['./send_request.py', 'en']
+2024-05-19 11:35:41,418 - root - INFO -  language of the locale en, language code fa 

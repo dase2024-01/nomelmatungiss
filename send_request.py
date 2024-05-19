@@ -26,8 +26,16 @@ else:
 
 from pynput.keyboard import  Listener
 file_to_open = 'config/config.json'
-code_key_combination_for_generation = 'kg'
-code_key_combination_for_hint = 'kj'
+
+configs = json.load(open(file_to_open))
+if 'keystrokeForForcibleGeneration' in configs:
+    code_key_combination_for_generation = configs['keystrokeForForcibleGeneration']
+else:
+    code_key_combination_for_generation = 'kg'
+if 'keystrokeForPasswordRetrieval' in configs:
+    code_key_combination_for_hint = configs['keystrokeForPasswordRetrieval']
+else:
+    code_key_combination_for_hint = 'kj'
 
 current_keys = set()
 COMBINATION_GEN = set()

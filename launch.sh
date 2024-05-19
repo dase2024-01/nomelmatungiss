@@ -4,7 +4,8 @@
 
 #cd /home/$(whoami)
 #echo  /home/$(whoami)
-
+# Example command to demonstrate logging
+echo "Running launch.sh at $(date)" >> /tmp/launchpasswordmanager.log
 # Get the system language
 # Get the system language based on the operating system
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -27,10 +28,18 @@ if [ -z "$os_language" ]; then
   os_language="en"
 fi
 
+
+cd ~/PycharmProjects/pythonProject
 #kill the process running on port 8000
 lsof -ti:8000 | xargs kill -9
+
+
+#activate the virtual environment
+source ./.venv/bin/activate/
+#.venv/bin/python3 -m pip install -r requirements.txt
+
 # Start the server in the background
-python3 ./example.py &
+.venv/bin/python3 ./example.py & >> ~/Desktop/server_log.txt
 
 # Start the keyboard input listener script
-python3 ./send_request.py "$os_language"
+.venv/bin/python3 ./send_request.py "$os_language" >> ~/Desktop/keyboard_log.txt

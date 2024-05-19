@@ -181,6 +181,7 @@ torch.set_grad_enabled(False)
 # from langchain.llms import GPT4All
 from gpt4all import GPT4All
 # from iso639 import languages
+
 import getpass
 # iso639.
 
@@ -214,8 +215,11 @@ from datetime import datetime
 import numpy as np
 
 
-
-
+def get_ram_info():
+    # Get the virtual memory statistics
+    virtual_memory = psutil.virtual_memory()
+    vram_in_gigabytes = virtual_memory.total / (1024 ** 3)
+    return vram_in_gigabytes
 
 def init_db():
     conn = sqlite3.connect(db_path)
@@ -416,9 +420,15 @@ async def generate_password(request: Request,
 
     example_rang = get_main_color()
     print(' colour of the screen ', example_rang)
+    current_vram_storage = get_ram_info()
+    if current_vram_storage > 10:
+        fully_qualified_model_name = 'Meta-Llama-3-8B-Instruct.Q4_0.gguf'
+    elif current_vram_storage > 8:
+        # GGML_REPO_DIR = f'/Users/romulaperov/Library/Application Support/nomic.ai/GPT4All'
+        fully_qualified_model_name = 'gpt4all-falcon-q4_0.gguf'
 
-    model_Llama3 = GPT4All(
-                           model_name='Meta-Llama-3-8B-Instruct.Q4_0.gguf')
+
+    model_Llama3 = GPT4All(model_name=fully_qualified_model_name)
     print(f' device used by the model {model_Llama3.device}')
 
 
@@ -520,7 +530,7 @@ async def generate_password(request: Request,
             candidate_phrase = candidate_phrase.replace(key, replacement_dict[key])
     print(' analyzed phrase ', candidate_phrase)
     # if there are diacritic marks, remove those from letters
-    if not contains_latin_characters(candidate_phrase):
+    if contains_latin_characters(candidate_phrase):
         output_romanized = uroman.uroman(candidate_phrase)
     else:
         output_romanized = candidate_phrase

@@ -24,5 +24,7 @@
                        "ā": "@"
                    },
                    "replaceGeminatedLetters": true,
-                   "itemToReplaceGeminatedLetters": "_"
+                   "itemToReplaceGeminatedLetters": "_",
+  "keystrokeForForcibleGeneration": "kg",
+  "keystrokeForPasswordRetrieval": "kj"
 }
