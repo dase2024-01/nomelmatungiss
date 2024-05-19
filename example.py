@@ -1,22 +1,162 @@
 import iso639
-
+from cryptography.fernet import Fernet
+import objc
+import Cocoa
+# Cocoa.NSB
 from PIL import ImageGrab
 from collections import Counter
 from fastapi import FastAPI, Request, Response
 import re
-app = FastAPI()
+
+import locale
+
+# example_info = get_recently_launched_apps(topN)
+
+import keyring
+import os
+KEY_FILE_PATH = 'secret.key'
+SERVICE_NAME = 'PasswordManager'
+KEY_NAME = 'encryption_key'
+import logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.FileHandler('example.log'),
+                              logging.StreamHandler()])
+
+import platform
+
+# def get_current_input_source_mac():
+#     import Quartz
+#     import Foundation
+#     source = Quartz.TISCopyCurrentKeyboardInputSource()
+#     source_id = Quartz.TISGetInputSourceProperty(source, Quartz.kTISPropertyInputSourceID)
+#     return source_id
+#
+# def get_current_input_source_windows():
+#     import ctypes
+#     import locale
+#     user32 = ctypes.WinDLL('user32', use_last_error=True)
+#     hkl = user32.GetKeyboardLayout(user32.GetWindowThreadProcessId(user32.GetForegroundWindow(), None))
+#     lid = hkl & 0xFFFF
+#     return locale.windows_locale.get(lid, f'Unknown (0x{lid:X})')
+
+# def get_current_input_source():
+#     if platform.system() not in ['Darwin', 'Windows']:
+#         raise NotImplementedError("This function is only implemented for macOS and Windows")
+#     elif platform.system() == 'Darwin':
+#         return get_current_input_source_mac()
+#     elif platform.system() == 'Windows':
+#         return get_current_input_source_windows()
+
+def get_active_window_mac():
+    import Quartz
+    window_info = Quartz.CGWindowListCopyWindowInfo(Quartz.kCGWindowListOptionOnScreenOnly,
+                                                    Quartz.kCGNullWindowID)
+    for window in window_info:
+        if window.get('kCGWindowLayer') == 0:  # Check if it's the top-level window
+            return window
+    return None
+
+def get_active_window_windows():
+    import pygetwindow as gw
+    import win32process
+    import win32gui
+    hwnd = win32gui.GetForegroundWindow()
+    return hwnd
+
+def get_process_for_active_window_windows():
+    hwnd = get_active_window_windows()
+    if not hwnd:
+        return None
+
+    _, pid = win32process.GetWindowThreadProcessId(hwnd)
+    try:
+        process = psutil.Process(pid)
+        app_name = process.name()
+        return process , app_name
+    except psutil.NoSuchProcess:
+        return None
+def get_active_window():
+    if platform.system() not in ['Darwin', 'Windows']:
+        raise NotImplementedError("This function is only implemented for macOS and Windows")
+    elif platform.system() == 'Darwin':
+        return get_active_window_mac()
+
+
+def contains_latin_characters(password):
+    # Regular expression pattern to match Latin characters (A-Z, a-z)
+    pattern = re.compile(r'[A-Za-z]')
+
+    # Search for the pattern in the password
+    if pattern.search(password):
+        return True
+    else:
+        return False
+
+def get_process_for_active_window_mac():
+    active_window = get_active_window_mac()
+    if not active_window:
+        return None
+
+    pid = active_window['kCGWindowOwnerPID']
+    app_name = active_window['kCGWindowOwnerName']
+    try:
+        process = psutil.Process(pid)
+        return process, app_name
+    except psutil.NoSuchProcess:
+        return None, app_name
+
+def get_process_for_active_window():
+    if platform.system() == 'Darwin':
+        return get_process_for_active_window_mac()
+    elif platform.system() == 'Windows':
+        return get_process_for_active_window_windows()
+
+def generate_and_store_key():
+    """
+    Generate a new key and save it to a file.
+    """
+    key = Fernet.generate_key()
+    keyring.set_password(SERVICE_NAME, KEY_NAME, key.decode())
+    logging.info(f'key generated {key}')
+    return key
+
+    # uncomment to save the key to a file
+    # with open(KEY_FILE_PATH, 'wb') as key_file:
+    #     key_file.write(key)
+def load_key():
+    """
+    Load the key from the key file.
+    """
+    key = keyring.get_password(SERVICE_NAME, KEY_NAME)
+    if key is None:
+        # If the key does not exist, generate and store a new one
+        key = generate_and_store_key()
+    else:
+        key = key.encode()
+    logging.info(f'key retrieved {key}')
+    return key
+
+    # uncomment to save the key to a file
+    # return open(KEY_FILE_PATH, 'rb').read()
+
+if not os.path.exists(KEY_FILE_PATH):
+    generate_and_store_key()
+
 import subprocess
 import os
 import psutil
 import uvicorn
 import webcolors
-from cryptography.fernet import Fernet
-import sqlite3
-import string
 
-key = Fernet.generate_key()
+import sqlite3
+
+app = FastAPI()
+
+key = load_key()
+# key = Fernet.generate_key()
 cipher_suite = Fernet(key)
-db_path = 'passwords.db'
+
 
 # processes = [p.info for p in psutil.process_iter(['pid', 'name', 'create_time'])]
 # # Sort processes by creation time
@@ -35,7 +175,7 @@ x = 2
 import transformers
 import torch
 
-ckpt_path = "internlm/internlm-xcomposer2-4khd-7b"
+
 
 torch.set_grad_enabled(False)
 # from langchain.llms import GPT4All
@@ -45,15 +185,17 @@ import getpass
 # iso639.
 
 import json
+ckpt_path = "internlm/internlm-xcomposer2-4khd-7b"
 CONFIG_FILE = 'config/config.json'
 if CONFIG_FILE:
     with open(CONFIG_FILE) as f:
         password_config = json.load(f)
+if 'dbPath' not in password_config:
+    db_path = password_config["dbPath"]
+else:
+    db_path = 'passwords.db'
 
-import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler('example.log'), logging.StreamHandler()])
-# iso639.to_iso639_2('lv')
-full_language_name = iso639.to_name(password_config["language_code"])
+
 # name_ iso639.to_name('lv')
 import os
 import uroman
@@ -71,6 +213,69 @@ llm_model_filename_full = os.path.join(GGML_REPO_DIR, name_of_model_gpt4all)
 from datetime import datetime
 import numpy as np
 
+
+
+
+
+def init_db():
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+
+    init_sql_script = '''
+        CREATE TABLE IF NOT EXISTS passwords (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            password TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, 
+            app_name TEXT NOT NULL,
+            app_hint TEXT DEFAULT NULL
+        )
+    '''
+    c.execute(init_sql_script)
+    conn.commit()
+    conn.close()
+
+def store_password(encrypted_password,
+                   app_name,
+                   app_hint=None):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    init_sql_script = '''
+        CREATE TABLE IF NOT EXISTS passwords (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            password TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, 
+            app_name TEXT NOT NULL,
+            app_hint TEXT DEFAULT NULL
+        )
+    '''
+    c.execute(init_sql_script)
+
+
+    c.execute('INSERT INTO passwords (password, app_name, app_hint) VALUES (?, ?, ?)', (encrypted_password, app_name, app_hint))
+    conn.commit()
+    conn.close()
+
+def retrieve_passwords(app_name,
+                       hint = True):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute(f"""SELECT  password, app_hint FROM passwords where app_name = '{app_name}' ORDER BY timestamp desc  LIMIT 1""")
+    row = c.fetchall()
+    conn.close()
+
+    # Decrypt passwords
+    # decrypted_passwords = []
+    if row:
+        # if hint:
+        #     decrypte
+        print(' row ', row[0][0])
+        decrypted_password = cipher_suite.decrypt(token= row[0][0]).decode()
+        # decrypted_passwords.append((row[0], decrypted_password, row[2]))
+        return ( decrypted_password,
+                 row[0][1])
+    else:
+        return None
+
 def closest_color(requested_color):
     min_colors = {}
     for key, name in webcolors.CSS3_HEX_TO_NAMES.items():
@@ -85,8 +290,8 @@ def get_main_color():
     # Capture the entire screen
     screenshot = ImageGrab.grab()
     save_path = 'screenshot.png'
-    # Save the screenshot
-    screenshot.save(save_path)
+    # Save the screenshot (optional)kg
+    # screenshot.save(save_path)
     # Convert the screenshot to a numpy array
     img_np = np.array(screenshot)
 
@@ -110,29 +315,31 @@ def get_main_color():
 #     print(f"The main color of the screen is: {main_color}")
 # Number of recent applications to retrieve
 topN = 1
-def get_recently_launched_apps(top_n=1):
-    # Get the PID of the current script
-    current_pid = os.getpid()
-
-    # Get all running processes
-    processes = []
-    for proc in psutil.process_iter(['pid', 'name', 'create_time']):
-        try:
-            pinfo = proc.info
-            pinfo['create_time'] = datetime.fromtimestamp(pinfo['create_time'])
-            # Exclude the current script's process
-            if pinfo['pid'] != current_pid:
-                processes.append(pinfo)
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-
-    # Sort processes by creation time
-    processes.sort(key=lambda p: p['create_time'], reverse=True)
-
-    # Get the top N most recently launched processes
-    recent_processes = processes[:top_n]
-
-    return recent_processes
+# def get_recently_launched_apps(top_n=1):
+#     # Get the PID of the current script
+#     current_pid = os.getpid()
+#     pattern = re.compile(r'^[A-Z]')
+#     # Get all running processes
+#     processes = []
+#     for proc in psutil.process_iter(['pid', 'name', 'create_time']):
+#         try:
+#             pinfo = proc.info
+#             pinfo['create_time'] = datetime.fromtimestamp(pinfo['create_time'])
+#             # Exclude the current script's process
+#             if pinfo['pid'] != current_pid:
+#                 # processes.append(pinfo)
+#                 if pattern.match(proc.info['name']):
+#                     processes.append(proc.info)
+#         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+#             pass
+#     # processe
+#     # Sort processes by creation time
+#     processes.sort(key=lambda p: p['create_time'], reverse=True)
+#
+#     # Get the top N most recently launched processes
+#     recent_processes = processes[:top_n]
+#
+#     return recent_processes
 
 
 def calculate_password_entropy(password):
@@ -179,13 +386,33 @@ import logging
 # currently_available_models = GPT4All.list_models()
 
 @app.get("/generate-password")
-async def generate_password(request: Request):
-    # get context
-    example_info = get_recently_launched_apps(topN)
+async def generate_password(request: Request,
+                            regenerate: bool = True,
+                            full_language_name: str = 'German'):
 
-    latest_launcched_app = " ".join(example_info[0]['name'].split(' ')[:2])
+    # get context
+    # latest_launcched_app = " ".join(example_info[0]['name'].split(' ')[:2])
+    process, latest_launcched_app = get_process_for_active_window()
+    # current_input_method = get_current_input_source()
+    # print(' current input method ', current_input_method)
     print(' latest launched app info ', latest_launcched_app)
     # get app
+
+    # try to get password hint
+
+    if regenerate == False:
+        hint = retrieve_passwords(latest_launcched_app)
+        if hint:
+            print(f' found the passwords {hint}')
+            response_payload = {"password": hint[0],
+                                "hint": hint[1],
+                                "strength": "Very Strong",
+                                "entropy": 128,
+                                }
+            return Response(
+                content=json.dumps(response_payload),
+                            media_type="application/json"
+            )
 
     example_rang = get_main_color()
     print(' colour of the screen ', example_rang)
@@ -220,25 +447,43 @@ async def generate_password(request: Request):
 
 
 
-    print('output_Llama3', output_Llama3)
+    # print('output_Llama3', output_Llama3)
     check_pass = False
     generated_passphrases = re.findall(r'passphrase": "(.*?)"', output_Llama3)
+    # print('output_Llama3', generated_passphrases)
     for passphrase in generated_passphrases:
-        print(passphrase)
+        print(f' the phrase is {passphrase} exanmple' )
         split_words = re.findall('[A-Z][^A-Z]*', output_Llama3.split('passphrase": "')[1].split('"')[0])
+        print(f' the phrase is {passphrase} fff')
+        # print('output_Llama3', split_words)
         split_result = []
+        print(f' the phrase is {passphrase} fff')
         for item in split_words:
             split_result.extend(item.split())
-        # [x.split(' ') for x in split_words]
+        print(f' the phrase is {passphrase} fff')
+            # print('output_Llama3', split_result)
+        # [x.split(' ') for x in split_words]kg
         no_words = len(split_result)
-        candidate_phrase = " ".join(split_result)
+        print('output_Llama3', split_result)
+        print(f' the phrase is {passphrase} fff')
+        if split_result != []:
+            candidate_phrase = " ".join(split_result)
+        else:
+            print(f' the phrase is {passphrase} fff')
+            candidate_phrase = passphrase
+        # if candidate_phrase == '':
+        #     candidate_phrase = passphrase
+        print(f'output_Llama3{candidate_phrase} rrf ', )
         candidate_phrase_raw = candidate_phrase
+        # print('output_Llama3', candidate_phrase)
         concat_phrase = candidate_phrase.replace(" ", "")
         no_chars = len(concat_phrase)
         # split('{')[1].split('}')
         if check_pass != False:
             break
-        ent, strength = evaluate_password_strength(candidate_phrase)
+        romanized = uroman.uroman(candidate_phrase)
+        print(' analyzed phrase ', romanized)
+        ent, strength = evaluate_password_strength(romanized)
         print('password strength ')
         while not check_pass:
             if no_words < MIN_WORDS:
@@ -253,7 +498,7 @@ async def generate_password(request: Request):
                 check_pass = True
 
             if check_pass == False:
-                print('candidate_phrase', candidate_phrase)
+                print('candidate_phrase', uroman.uroman(candidate_phrase))
                 print('could not pass the requirements')
                 break
                 # output_Llama3 = model_Llama3.generate(prompt=corr_prompt,
@@ -265,11 +510,21 @@ async def generate_password(request: Request):
         geminated_letters = find_geminated_letters(candidate_phrase)
         for letter in geminated_letters:
             candidate_phrase = candidate_phrase.replace(letter*2, letter + password_config["itemToReplaceGeminatedLetters"])
+    print(' analyzed phrase ', candidate_phrase)
+
+    if not contains_latin_characters(candidate_phrase):
+        candidate_phrase = uroman.uroman(candidate_phrase)
+
     if password_config["replaceVowelsWithNumbers"]:
         for key in replacement_dict:
             candidate_phrase = candidate_phrase.replace(key, replacement_dict[key])
+    print(' analyzed phrase ', candidate_phrase)
     # if there are diacritic marks, remove those from letters
-    output_romanized = uroman.uroman(candidate_phrase)
+    if not contains_latin_characters(candidate_phrase):
+        output_romanized = uroman.uroman(candidate_phrase)
+    else:
+        output_romanized = candidate_phrase
+    # output_romanized = uroman.uroman(candidate_phrase)
 
     if password_config["capitalizeOutput"]:
         if password_config["capitalizeSyllables"]:
@@ -281,16 +536,28 @@ async def generate_password(request: Request):
         output_romanized = output_romanized.replace(' ', '')
 
     model_Llama3.close()
-
+    # # Step 1: Re-encode the string to bytes using 'latin-1'
+    # byte_sequence = candidate_phrase_raw.encode('latin-1')
+    #
+    # # Step 2: Decode the bytes back to a string using 'utf-8'
+    # candidate_phrase_raw = byte_sequence.decode('utf-8')
+    # candidate_phrase_raw = candidate_phrase_raw.encode(encoding='utf-8')
     print('Generated passphrase', output_romanized)
+    print('Hint for passphrase', candidate_phrase_raw)
 
     response_payload = {"password": output_romanized,
-
                         "phrase": candidate_phrase_raw,
                         "strength": strength,
                         "entropy": ent,
                         }
-    print(response_payload)
+
+    # dump password to db
+    store_password(cipher_suite.encrypt(output_romanized.encode()),
+                   app_name,
+                   app_hint = candidate_phrase_raw
+                   )
+
+    # print(response_payload)
     return Response(content=json.dumps(response_payload),
                     media_type="application/json")
 

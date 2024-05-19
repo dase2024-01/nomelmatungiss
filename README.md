@@ -13,33 +13,44 @@ during the year 2023-24.
 
 ## Behaviour Configuration:
 
-This configuration file, .json, is for a password generator application named "Word". Below are the details of the configuration parameters and their functions:
+This configuration file, .json, is for a password generator application.
+Below are the details of the configuration parameters and their functions:
 
-app_name: "Word"
+the app name for which the password is generated. By default left empty, 
+then the latest app launched is perceived as the application. 
+`app_name: "Word"`
 
 The name of the application generating the passwords.
-language_code: "lv"
+
+`language_code: "lv"`
 
 The language code, set to Latvian (lv).
-context: "BLUE"
+
+`context: "BLUE"`
 
 The context in which the password generator will be used. This can be used to set specific settings or themes.
-MIN_WORDS: 4
+
+`MIN_WORDS: 4`
 
 The minimum number of words to be included in the generated password.
-MAX_SYMBOLS: 25
+
+`MAX_SYMBOLS: 25`
 
 The maximum number of symbols allowed in the generated password.
-MIN_SYMBOLS: 13
+
+`MIN_SYMBOLS: 13`
 
 The minimum number of symbols required in the generated password.
-capitalizeOutput: false
+
+`capitalizeOutput: false`
 
 A boolean flag indicating whether the output password should be fully capitalized. Set to false, meaning no capitalization will be applied to the entire password.
-capitalizeSyllables: false
+
+`capitalizeSyllables: false`
 
 A boolean flag indicating whether each syllable in the generated password should be capitalized. Set to false, meaning syllables will not be capitalized.
-replaceVowelsWithNumbers: true
+
+`replaceVowelsWithNumbers: true`
 
 A boolean flag indicating whether vowels should be replaced with numbers according to the vowelReplacementDictionary. Set to true, meaning vowels will be replaced.
 vowelReplacementDictionary:
@@ -58,7 +69,8 @@ A dictionary mapping specific vowels to their replacement numbers or symbols:
 "i": "!"
 "ē": "&"
 "ā": "@"
-replaceGeminatedLetters: true
+
+`replaceGeminatedLetters: true`
 
 A boolean flag indicating whether geminated (doubled) letters should be replaced. Set to true, meaning geminated letters will be replaced.
 itemToReplaceGeminatedLetters: "_"
