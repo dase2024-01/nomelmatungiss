@@ -9,6 +9,19 @@ during the year 2023-24.
 - Python 3.9 (or higher, lower versions may work but are not tested)
 - 8GB of RAM (for decent performance, 16 GB or more is recommended)
 - At least 8 GB of free disk space
+- At least Mac Big Sur (for MacOS) or Windows. Linux: Not fully supported.
+
+## Installation:
+
+Default server port is 8000 
+
+1. `$ git clone https://github.com/dase2024-01/nomelmatungiss`
+2. `chmod +x install.sh`
+2. `$ install.sh`
+
+## Launch :
+
+1. `$ launch.sh`
 
 
 ## Behaviour Configuration:
@@ -77,12 +90,6 @@ itemToReplaceGeminatedLetters: "_"
 
 The character to replace geminated letters with. In this configuration, geminated letters will be replaced with an underscore (_).
 
-## Installation:
-
-Default server port is 8000 
-
-1. `$ git clone https://github.com/dase2024-01/nomelmatungiss`
-2. `$ launch.sh`
 
 ## More granular installation:
 2. `venv/bin/activate`
