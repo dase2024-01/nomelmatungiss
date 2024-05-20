@@ -11,6 +11,9 @@ $startupFolder = [System.Environment]::GetFolderPath("Startup")
 # Path to the Startup folder
 $shortcutPath = "$startupFolder\LaunchPasswordManager.lnk"
 
+# install all dependencies
+pip install -r requirements_windows.txt
+
 Write-Host "This script will register the install.ps1 script to run at startup."
 $consent = Read-Host "Do you want to continue? (y/n)"
 

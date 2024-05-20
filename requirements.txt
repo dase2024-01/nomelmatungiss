@@ -20,8 +20,17 @@ google-pasta==0.2.0
 gpt4all==2.6.0
 grpcio==1.63.0
 h5py==3.11.0
+cryptography
+fastapi
+keyring
+webcolors
+pygetwindow
+timm
 huggingface-hub==0.23.0
 idna==3.7
+pyperclip
+pycryptodome
+pynput
 importlib_metadata==7.1.0
 inquirerpy==0.3.4
 iso639==0.1.4
@@ -74,7 +83,7 @@ tenacity==8.3.0
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
 tensorflow==2.16.1
-tensorflow-io-gcs-filesystem==0.37.0
+tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.4.0
 tokenizers==0.19.1
 torch==2.3.0
