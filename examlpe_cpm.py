@@ -5,6 +5,7 @@ import os
 # from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, AutoModel, AutoModelForVision2Seq, AutoProcessor
 
 import torch
+torch.cuda.empty_cache()
 from PIL import Image
 from transformers import AutoModel, AutoTokenizer
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
@@ -13,7 +14,7 @@ model = AutoModel.from_pretrained( 'openbmb/MiniCPM-V-2',
                                    trust_remote_code=True,
                                    torch_dtype=torch.float16)
 # For Nvidia GPUs support BF16 (like A100, H100, RTX3090)
-# model = model.to(device='cuda', dtype=torch.bfloat16)
+model = model.to(device='cuda', dtype=torch.float16)
 
 # model = model.to(device='mps', dtype=torch.float16)
 

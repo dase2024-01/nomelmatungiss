@@ -1,13 +1,24 @@
+import sys
+
 import iso639
-from cryptography.fernet import Fernet
-import objc
-import Cocoa
+
+import sys
+if sys.platform == 'win32' or sys.platform.startswith('win'):
+    # import win32
+    pass
+else:
+    from cryptography.fernet import Fernet
+    import objc
+    import Cocoa
+
+
 # Cocoa.NSB
 from PIL import ImageGrab
 from collections import Counter
 from fastapi import FastAPI, Request, Response
 import re
-
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 import locale
 
 # example_info = get_recently_launched_apps(topN)
@@ -65,6 +76,7 @@ def get_active_window_windows():
     return hwnd
 
 def get_process_for_active_window_windows():
+    import win32process
     hwnd = get_active_window_windows()
     if not hwnd:
         return None
@@ -111,37 +123,39 @@ def get_process_for_active_window():
         return get_process_for_active_window_mac()
     elif platform.system() == 'Windows':
         return get_process_for_active_window_windows()
-
-def generate_and_store_key():
-    """
-    Generate a new key and save it to a file.
-    """
-    key = Fernet.generate_key()
-    keyring.set_password(SERVICE_NAME, KEY_NAME, key.decode())
-    logging.info(f'key generated {key}')
-    return key
+if sys.platform != 'win32':
+    pass
+    def generate_and_store_key():
+        """
+        Generate a new key and save it to a file.
+        """
+        import Fernet
+        key = Fernet.generate_key()
+        keyring.set_password(SERVICE_NAME, KEY_NAME, key.decode())
+        logging.info(f'key generated {key}')
+        return key
 
     # uncomment to save the key to a file
     # with open(KEY_FILE_PATH, 'wb') as key_file:
-    #     key_file.write(key)
-def load_key():
-    """
-    Load the key from the key file.
-    """
-    key = keyring.get_password(SERVICE_NAME, KEY_NAME)
-    if key is None:
-        # If the key does not exist, generate and store a new one
-        key = generate_and_store_key()
-    else:
-        key = key.encode()
-    logging.info(f'key retrieved {key}')
-    return key
+            #     key_file.write(key)
+    def load_key():
+        """
+        Load the key from the key file.
+        """
+        key = keyring.get_password(SERVICE_NAME, KEY_NAME)
+        if key is None:
+            # If the key does not exist, generate and store a new one
+            key = generate_and_store_key()
+        else:
+            key = key.encode()
+        logging.info(f'key retrieved {key}')
+        return key
 
     # uncomment to save the key to a file
     # return open(KEY_FILE_PATH, 'rb').read()
 
-if not os.path.exists(KEY_FILE_PATH):
-    generate_and_store_key()
+    if not os.path.exists(KEY_FILE_PATH):
+        generate_and_store_key()
 
 import subprocess
 import os
@@ -152,10 +166,13 @@ import webcolors
 import sqlite3
 
 app = FastAPI()
-
-key = load_key()
+if sys.platform != 'win32':
+    key = load_key()
+    cipher_suite = Fernet(key)
+else:
+    pass
 # key = Fernet.generate_key()
-cipher_suite = Fernet(key)
+
 
 
 # processes = [p.info for p in psutil.process_iter(['pid', 'name', 'create_time'])]
@@ -170,7 +187,8 @@ cipher_suite = Fernet(key)
 
 
 # print(f"Most recently launched application: {recent_process['name']}")
-from eng_syl.syllabify import Syllabel
+if sys.platform != 'win32':
+    from eng_syl.syllabify import Syllabel
 x = 2
 import transformers
 import torch
@@ -214,6 +232,7 @@ llm_model_filename_full = os.path.join(GGML_REPO_DIR, name_of_model_gpt4all)
 from datetime import datetime
 import numpy as np
 
+key = 'OM7z6ZqJ88kcqKu28nyz/4j+EeEM/2Ovpw8ESjqc6rg='
 
 def get_ram_info():
     # Get the virtual memory statistics
@@ -238,6 +257,28 @@ def init_db():
     conn.commit()
     conn.close()
 
+def store_password(password, app_name, hint):
+    if sys.platform.startswith('Windows'):
+        return store_password_windows(password=password,
+                                      key = key,
+                                      app_name = app_name,
+                                      hint = app_hint)
+    else:
+    #     Darwin
+        return store_password_mac(encrypted_password = password,
+                                  app_name=app_name,
+                                      hint=app_hint)
+    # return password
+
+def encrypt_password_windows(password,
+                           key,
+                           app_name,
+                           app_hint):
+    # cipher = AES.new(key, AES.MODE_EAX)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(password.encode('utf-8'))
+    return base64.b64encode(nonce + tag + ciphertext).decode('utf-8')
+
 def store_password(encrypted_password,
                    app_name,
                    app_hint=None):
@@ -255,30 +296,58 @@ def store_password(encrypted_password,
     c.execute(init_sql_script)
 
 
-    c.execute('INSERT INTO passwords (password, app_name, app_hint) VALUES (?, ?, ?)', (encrypted_password, app_name, app_hint))
+    c.execute('INSERT INTO passwords (password, app_name, app_hint) VALUES (?, ?, ?)', (encrypted_password,
+                                                                                        app_name,
+                                                                                        app_hint))
     conn.commit()
     conn.close()
 
-def retrieve_passwords(app_name,
-                       hint = True):
+def retrieve_passwords(db_path,
+                       app_name,
+                       app_hint):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    c.execute(f"""SELECT  password, app_hint FROM passwords where app_name = '{app_name}' ORDER BY timestamp desc  LIMIT 1""")
+    c.execute(
+        f"""SELECT  password, app_hint FROM passwords where app_name = '{app_name}' ORDER BY timestamp desc  LIMIT 1""")
     row = c.fetchall()
     conn.close()
-
-    # Decrypt passwords
-    # decrypted_passwords = []
     if row:
-        # if hint:
-        #     decrypte
-        print(' row ', row[0][0])
-        decrypted_password = cipher_suite.decrypt(token= row[0][0]).decode()
-        # decrypted_passwords.append((row[0], decrypted_password, row[2]))
-        return ( decrypted_password,
-                 row[0][1])
+        encrypted_password = row[0][0]
+    if sys.platform.startswith('Windows'):
+        return retrieve_passwords_windows(encrypted_password = encrypted_password,
+                                          key = key,
+                                          app_name = app_name,
+                                          hint = app_hint)
     else:
-        return None
+    #     Darwin
+        return retrieve_passwords_mac(app_name=app_name,
+                                      hint=app_hint)
+
+def retrieve_passwords_windows( encrypted_password,
+        key,
+                                app_name,
+                                hint = True):
+
+
+        encrypted_data = base64.b64decode(encrypted_password)
+        nonce = encrypted_data[:16]
+        tag = encrypted_data[16:32]
+        ciphertext = encrypted_data[32:]
+        cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+        # return
+        return ( cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8'),
+                     row[0][1])
+
+def retrieve_passwords_mac(password ,
+                           app_name,
+                       hint = True):
+
+    decrypted_password = cipher_suite.decrypt(token= password).decode()
+    # decrypted_passwords.append((row[0], decrypted_password, row[2]))
+    return ( decrypted_password,
+             row[0][1])
+    # else:
+    #     return None
 
 def closest_color(requested_color):
     min_colors = {}
@@ -289,6 +358,7 @@ def closest_color(requested_color):
         bd = (b_c - requested_color[2]) ** 2
         min_colors[(rd + gd + bd)] = name
     return min_colors[min(min_colors.keys())]
+
 # main colour
 def get_main_color():
     # Capture the entire screen
@@ -395,11 +465,14 @@ async def generate_password(request: Request,
                             full_language_name: str = 'German'):
 
     # get context
-    # latest_launcched_app = " ".join(example_info[0]['name'].split(' ')[:2])
-    process, latest_launcched_app = get_process_for_active_window()
-    # current_input_method = get_current_input_source()
-    # print(' current input method ', current_input_method)
-    print(' latest launched app info ', latest_launcched_app)
+    if sys.platform != 'win32':
+        # latest_launcched_app = " ".join(example_info[0]['name'].split(' ')[:2])
+        process, latest_launcched_app = get_process_for_active_window()
+        # current_input_method = get_current_input_source()
+        # print(' current input method ', current_input_method)
+        print(' latest launched app info ', latest_launcched_app)
+    else:
+        pass
     # get app
 
     # try to get password hint
@@ -537,7 +610,7 @@ async def generate_password(request: Request,
     # output_romanized = uroman.uroman(candidate_phrase)
 
     if password_config["capitalizeOutput"]:
-        if password_config["capitalizeSyllables"]:
+        if (password_config["capitalizeSyllables"]) and (sys.platform == "win32"):
             syllabel = Syllabel()
             output_romanized = " ".join(syllabel.syllabify(output_romanized).split('-'))
         # else
@@ -561,8 +634,15 @@ async def generate_password(request: Request,
                         "entropy": ent,
                         }
 
+    if 'win' in sys.platform:
+        encrypted_password = encrypt_password_windows(password = output_romanized.encode('utf-8'),
+                                                      key=key,
+                                                      app_name=app_name)
+    else:
+        encrypted_password = cipher_suite.encrypt(output_romanized.encode())
+
     # dump password to db
-    store_password(cipher_suite.encrypt(output_romanized.encode()),
+    store_password(encrypted_password,
                    app_name,
                    app_hint = candidate_phrase_raw
                    )
