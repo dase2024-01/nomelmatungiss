@@ -7,7 +7,7 @@ during the year 2023-24.
 ## Minimal system requirements:
 
 - Python 3.9 (or higher, lower versions may work but are not tested)
-- 8GB of RAM (for decent performance, 16 GB or more is recommended)
+- 8GB of RAM (for minimal experience, Phi model), or 16 GB (Llama3, full experience)
 - At least 8 GB of free disk space
 - At least Mac Big Sur (for MacOS) or Windows. Linux: Not fully supported.
 

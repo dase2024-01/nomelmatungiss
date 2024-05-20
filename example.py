@@ -421,12 +421,14 @@ async def generate_password(request: Request,
     example_rang = get_main_color()
     print(' colour of the screen ', example_rang)
     current_vram_storage = get_ram_info()
-    if current_vram_storage > 10:
+    print(f' retrieved ram, {current_vram_storage}')
+    # current_vram_storage = 7
+    if current_vram_storage > 8:
         fully_qualified_model_name = 'Meta-Llama-3-8B-Instruct.Q4_0.gguf'
-    elif current_vram_storage > 8:
+    elif current_vram_storage > 6:
         # GGML_REPO_DIR = f'/Users/romulaperov/Library/Application Support/nomic.ai/GPT4All'
-        fully_qualified_model_name = 'gpt4all-falcon-q4_0.gguf'
-
+        fully_qualified_model_name = 'Phi-3-mini-4k-instruct.Q4_0.gguf'
+    # 'gpt4all-falcon-q4_0.gguf'
 
     model_Llama3 = GPT4All(model_name=fully_qualified_model_name)
     print(f' device used by the model {model_Llama3.device}')
@@ -454,14 +456,13 @@ async def generate_password(request: Request,
                                           max_tokens=50, temp=0.7,
                                           repeat_penalty=1.18,
                                           top_k = 40, top_p = 0.4)
-
-
-
     # print('output_Llama3', output_Llama3)
     check_pass = False
     generated_passphrases = re.findall(r'passphrase": "(.*?)"', output_Llama3)
     # print('output_Llama3', generated_passphrases)
     for passphrase in generated_passphrases:
+        passphrase = passphrase.replace('-', ' ')
+        passphrase = passphrase.replace('_', ' ')
         print(f' the phrase is {passphrase} exanmple' )
         split_words = re.findall('[A-Z][^A-Z]*', output_Llama3.split('passphrase": "')[1].split('"')[0])
         print(f' the phrase is {passphrase} fff')
