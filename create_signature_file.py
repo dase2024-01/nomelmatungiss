@@ -16,6 +16,7 @@ def generate_nonce(length=8):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
 def generate_challenge_payload(user_id,
                                session_id):
+
     payload = {
         "nonce": generate_nonce(),
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
