@@ -17,8 +17,18 @@ from PIL import ImageGrab
 from collections import Counter
 from fastapi import FastAPI, Request, Response
 import re
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+if sys.platform == 'win32':
+    import win32gui
+    import win32process
+    import psutil
+    import ctypes
+    import locale
+    import pygetwindow as gw
+    import win32gui
+    import win32process
+    import win32con
+    from Crypto.Cipher import AES
+    from Crypto.Random import get_random_bytes
 import locale
 
 # example_info = get_recently_launched_apps(topN)
@@ -175,6 +185,8 @@ else:
 
 
 
+
+
 # processes = [p.info for p in psutil.process_iter(['pid', 'name', 'create_time'])]
 # # Sort processes by creation time
 # processes.sort(key=lambda p: p['create_time'], reverse=True)
@@ -302,9 +314,8 @@ def store_password(encrypted_password,
     conn.commit()
     conn.close()
 
-def retrieve_passwords(db_path,
-                       app_name,
-                       app_hint):
+def retrieve_passwords(app_name  , db_path=db_path,
+                       ):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute(
@@ -313,39 +324,38 @@ def retrieve_passwords(db_path,
     conn.close()
     if row:
         encrypted_password = row[0][0]
+        app_hint = row[0][1]
     if sys.platform.startswith('Windows'):
-        return retrieve_passwords_windows(encrypted_password = encrypted_password,
+        return (retrieve_passwords_windows(encrypted_password = encrypted_password,
                                           key = key,
                                           app_name = app_name,
-                                          hint = app_hint)
+                                          hint = app_hint), app_hint)
     else:
     #     Darwin
-        return retrieve_passwords_mac(app_name=app_name,
-                                      hint=app_hint)
+        return (retrieve_passwords_mac(password =encrypted_password,
+                                      hint=app_hint), app_hint)
 
 def retrieve_passwords_windows( encrypted_password,
         key,
                                 app_name,
                                 hint = True):
 
-
+        import base64
         encrypted_data = base64.b64decode(encrypted_password)
         nonce = encrypted_data[:16]
         tag = encrypted_data[16:32]
         ciphertext = encrypted_data[32:]
         cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
         # return
-        return ( cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8'),
-                     row[0][1])
+        return ( cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8'))
 
 def retrieve_passwords_mac(password ,
-                           app_name,
                        hint = True):
 
     decrypted_password = cipher_suite.decrypt(token= password).decode()
     # decrypted_passwords.append((row[0], decrypted_password, row[2]))
     return ( decrypted_password,
-             row[0][1])
+             )
     # else:
     #     return None
 
@@ -363,7 +373,7 @@ def closest_color(requested_color):
 def get_main_color():
     # Capture the entire screen
     screenshot = ImageGrab.grab()
-    save_path = 'screenshot.png'
+
     # Save the screenshot (optional)kg
     # screenshot.save(save_path)
     # Convert the screenshot to a numpy array
@@ -436,6 +446,7 @@ def find_geminated_letters(text):
     # Regular expression to find geminated letters
     pattern = r'([a-zA-Z0-9])\1'
     return re.findall(pattern, text)
+
 def evaluate_password_strength(password):
     entropy = calculate_password_entropy(password)
     # Define entropy thresholds for password strength categories
@@ -459,6 +470,41 @@ import logging
 # model_path=llm_model_filename_full,
 # currently_available_models = GPT4All.list_models()
 
+from PIL import Image
+from transformers import AutoModel, AutoTokenizer
+if torch.cuda.is_available():
+    print('CUDA available')
+
+    device_name = 'cuda'
+else:
+    device_name = 'mps'
+@app.get('/generate-content')
+async def generate_content(request: Request= None):
+    model = AutoModel.from_pretrained('openbmb/MiniCPM-V-2',
+                                      trust_remote_code=True,
+                                      torch_dtype=torch.float16)
+    # For Nvidia GPUs support BF16 (like A100, H100, RTX3090)
+    model = model.to(device=device_name, dtype=torch.float16)
+
+    tokenizer = AutoTokenizer.from_pretrained('openbmb/MiniCPM-V-2', trust_remote_code=True)
+    question2 = """What can you see in the picture?
+     What colour is the picture? Answer in English"""
+    msgs = [
+        {'role': 'user', 'content': question2}
+    ]
+
+    image = Image.open('2024-05-19 19.06.52.jpg').convert('RGB')
+    res, context, _ = model.chat(
+        image=image,
+        msgs=msgs,
+        context=None,
+        tokenizer=tokenizer,
+        sampling=True,
+        temperature=0.2
+    )
+    return res
+
+
 @app.get("/generate-password")
 async def generate_password(request: Request,
                             regenerate: bool = True,
@@ -466,6 +512,8 @@ async def generate_password(request: Request,
 
     # get context
     if sys.platform != 'win32':
+
+
         # latest_launcched_app = " ".join(example_info[0]['name'].split(' ')[:2])
         process, latest_launcched_app = get_process_for_active_window()
         # current_input_method = get_current_input_source()
@@ -478,7 +526,7 @@ async def generate_password(request: Request,
     # try to get password hint
 
     if regenerate == False:
-        hint = retrieve_passwords(latest_launcched_app)
+        hint = retrieve_passwords(app_name=latest_launcched_app)
         if hint:
             print(f' found the passwords {hint}')
             response_payload = {"password": hint[0],
@@ -490,11 +538,21 @@ async def generate_password(request: Request,
                 content=json.dumps(response_payload),
                             media_type="application/json"
             )
+    if (sys.platform != 'win32'):
+        example_rang = get_main_color()
+        print(' colour of the screen ', example_rang)
+        context_words = [example_rang]
+    else:
+        context_words = []
 
-    example_rang = get_main_color()
-    print(' colour of the screen ', example_rang)
+
     current_vram_storage = get_ram_info()
     print(f' retrieved ram, {current_vram_storage}')
+    if (sys.platform != 'win32') and (current_vram_storage > 24):
+    #     get the context of the screen
+        example_context = await generate_content()
+        context_words.append(example_context)
+
     # current_vram_storage = 7
     if current_vram_storage > 8:
         fully_qualified_model_name = 'Meta-Llama-3-8B-Instruct.Q4_0.gguf'
@@ -506,12 +564,10 @@ async def generate_password(request: Request,
     model_Llama3 = GPT4All(model_name=fully_qualified_model_name)
     print(f' device used by the model {model_Llama3.device}')
 
-
-
     # Llama 3 Instruct
     app_name = 'Word'
     app_name = latest_launcched_app
-    context_words = [example_rang]
+
     MIN_WORDS = 3
     MAX_SYMBOLS = 25
     MIN_SYMBOLS = 13
@@ -618,7 +674,7 @@ async def generate_password(request: Request,
         output_romanized = "".join([laten.capitalize() for laten in output_romanized.split(' ')])
     else:
         output_romanized = output_romanized.replace(' ', '')
-
+    # unload the model
     model_Llama3.close()
     # # Step 1: Re-encode the string to bytes using 'latin-1'
     # byte_sequence = candidate_phrase_raw.encode('latin-1')
@@ -635,7 +691,7 @@ async def generate_password(request: Request,
                         "entropy": ent,
                         }
 
-    if 'win' in sys.platform:
+    if 'win32' in sys.platform:
         encrypted_password = encrypt_password_windows(password = output_romanized.encode('utf-8'),
                                                       key=key,
                                                       app_name=app_name)

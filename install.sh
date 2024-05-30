@@ -63,6 +63,8 @@ cd $SCRIPT_DIR || return
 
 pip3 install -r requirements.txt
 
+brew install gpg
+
 if [[ "$consent" == "y" || "$consent" == "Y" ]]; then
     # Ensure the launch script is executable
     chmod +x "$LAUNCH_SCRIPT_PATH"

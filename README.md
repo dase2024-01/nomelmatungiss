@@ -11,6 +11,7 @@ during the year 2023-24.
 - At least 8 GB of free disk space
 - At least Mac Big Sur (for MacOS) or Windows. Linux: Not fully supported.
 
+
 ## Required permissions: 
 
 These need to be given to the application in which the launch scripts are run: 
