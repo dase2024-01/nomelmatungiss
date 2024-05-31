@@ -12,6 +12,7 @@ during the year 2023-24.
 - At least Mac Big Sur (for MacOS) or Windows. Linux: Not fully supported.
 
 
+
 ## Required permissions: 
 
 These need to be given to the application in which the launch scripts are run: 
@@ -29,6 +30,15 @@ and no data will be collected or sent to any third parties)
 1. `$ git clone https://github.com/dase2024-01/nomelmatungiss`
 2. `chmod +x install.sh`
 2. `$ install.sh`
+3. Install jq, swig (on Linux and MacOS)
+   3. To use with a security module
+   3.1. On Windows and Mac, install GnuPG from available [distros](https://gnupg.org/download/)
+   (on Linux should be automatically installed)
+   3.2. Insert the physical key, generate the keys on GPG key and export the public key to the folder:
+   `$ gpg --card-edit` - the dialog, `admin` - the admin menu, `generate` - generate the keys, `quit` - exit the dialog. During the dialog, opt to export the public key. 
+  
+  
+
 
 ## Launch:
 
@@ -43,7 +53,8 @@ When correctly installed, the app should run as background process reading the k
 It has the keystroke 'k+g' (default) as a trigger to forcibly generate the password for the current window (of application), 
 and 'k+j' to retrieve the  hint for a password (if exists) or to generate a new password (if not). These keys can be changed in config.json.
 
-Passwords are securely stored in the sqlite3 database, the key being stored in the PC keyring. 
+Passwords are securely stored in the sqlite3 database, the key being stored in the PC keyring or on an external security module,
+ --- any smart card, gnupg-compatible key, i. a. PIV key would do.
 
 The hint for a password is a base "meaningful" sentence before its romanization and replacement per the transformation lexicon specified in the configs.
 After setting their own transformation lexicon, the user is supposed to perceive the seed passphrase through its masked rendition, 
@@ -59,13 +70,16 @@ but convenience decreases for minor and abjadic languages as opposed to widespre
 
 1. The application does not dig into browser tabs and does not take their names into account. 
 2. No GUI interface.
-3. Passwords are generated per device, no syncing is available. 
+3. Passwords are generated per device, no device syncing is available. 
 
 
 ## Behaviour Configuration:
 
 This configuration file, .json, is for a password generator application.
 Below are the details of the configuration parameters and their functions:
+
+the mode with which the password is authenticated, 
+`authentication`: "hsm" or "passwords" 
 
 the app name for which the password is generated. By default left empty, 
 then the latest app launched is perceived as the application. 
